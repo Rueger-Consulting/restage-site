@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restage – DataStage, the way it should have been</title>
+<meta name="description" content="Restage is a keyboard-first flow editor for IBM DataStage on Cloud Pak for Data and IBM Cloud: graph and code side by side, always in sync.">
+<meta property="og:title" content="Restage – DataStage, the way it should have been">
+<meta property="og:description" content="A keyboard-first flow editor for IBM DataStage on Cloud Pak for Data and IBM Cloud. Graph and code side by side, always in sync.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23101418'/%3E%3Cpath d='M9 23V9h7.5a4.5 4.5 0 0 1 0 9H13m3.5 0L22 23' fill='none' stroke='%23f2b33d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0e1215;
+    --bg-2: #141a1f;
+    --panel: #182027;
+    --line: #26313a;
+    --text: #e6eaed;
+    --muted: #9aa6af;
+    --faint: #6b7781;
+    --accent: #f2b33d;
+    --accent-ink: #1a1305;
+    --blue: #6cb6ff;
+    --green: #7ee0a1;
+    --pink: #f59ac0;
+    --violet: #b9a3ff;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* top bar */
+  header.top { position: sticky; top: 0; z-index: 10; background: rgba(14,18,21,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .2px; color: var(--text); }
+  .brand:hover { text-decoration: none; }
+  .brand svg { width: 26px; height: 26px; }
+  nav.links { display: flex; gap: 22px; align-items: center; font-size: 14px; }
+  nav.links a { color: var(--muted); }
+  nav.links a:hover { color: var(--text); text-decoration: none; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .lang button { background: none; border: 0; color: var(--muted); font: 600 12px var(--sans); padding: 5px 10px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+  /* hero */
+  .hero { padding: 84px 0 40px; }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 1.6px; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: clamp(40px, 6.2vw, 76px); line-height: 1.02; letter-spacing: -1.8px; margin: 18px 0 18px; font-weight: 800; }
+  h1 .re { color: var(--accent); }
+  .lede { font-size: clamp(17px, 2vw, 21px); color: var(--muted); max-width: 720px; margin: 0; }
+  .cta { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 8px; font-weight: 600; font-size: 15px; border: 1px solid var(--line); color: var(--text); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn:hover { text-decoration: none; filter: brightness(1.08); }
+
+  /* editor mock */
+  .mock { margin-top: 56px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg-2); box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); }
+  .mock-bar { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); color: var(--faint); }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: #2c363f; display: block; }
+  .mock-bar .crumb b { color: var(--muted); font-weight: 500; }
+  .mock-bar .sync { margin-left: auto; color: var(--green); }
+  .panes { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 380px; }
+  .graph { position: relative; overflow: hidden; padding: 22px; border-right: 1px solid var(--line);
+    background-image: radial-gradient(#212b33 1px, transparent 1px); background-size: 18px 18px; }
+  .graph svg.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .card { position: absolute; width: 168px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; font: 11.5px/1.45 var(--mono); }
+  .card .h { display: flex; justify-content: space-between; padding: 6px 9px; border-bottom: 1px solid var(--line); }
+  .card .h b { color: var(--text); font-weight: 600; }
+  .card .h span { color: var(--faint); }
+  .card .b { padding: 6px 9px; color: var(--muted); white-space: pre; overflow: hidden; }
+  .card.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(242,179,61,.18); }
+  .kw { color: var(--pink); } .fn { color: var(--blue); } .st { color: var(--green); } .nm { color: var(--violet); } .cm { color: var(--faint); }
+  .code { padding: 18px 0; font: 13px/1.7 var(--mono); color: var(--text); overflow: auto; }
+  .code .ln { display: block; padding: 0 18px 0 0; white-space: pre; }
+  .code .ln::before { content: attr(data-n); display: inline-block; width: 40px; padding-right: 14px; text-align: right; color: #3f4b55; }
+  .code .ln.hl { background: rgba(242,179,61,.08); box-shadow: inset 2px 0 var(--accent); }
+  .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .mock-status { display: flex; gap: 18px; padding: 7px 14px; border-top: 1px solid var(--line); font: 11.5px var(--mono); color: var(--faint); }
+  .mock-status kbd { color: var(--muted); }
+
+  /* sections */
+  section { padding: 88px 0 0; }
+  h2 { font-size: clamp(28px, 3.6vw, 40px); letter-spacing: -.8px; line-height: 1.12; margin: 12px 0 16px; }
+  .sub { color: var(--muted); max-width: 760px; font-size: 18px; margin: 0; }
+  .why { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
+  .why .col { border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; background: var(--bg-2); }
+  .why .col h3 { margin: 0 0 12px; font-size: 15px; font-family: var(--mono); letter-spacing: .5px; }
+  .why .col.old h3 { color: var(--faint); }
+  .why .col.new h3 { color: var(--accent); }
+  .why ul { margin: 0; padding: 0; list-style: none; }
+  .why li { padding: 7px 0 7px 26px; position: relative; color: var(--muted); border-top: 1px dashed var(--line); }
+  .why li:first-child { border-top: 0; }
+  .why .old li::before { content: "–"; position: absolute; left: 4px; color: var(--faint); }
+  .why .new li { color: var(--text); }
+  .why .new li::before { content: "→"; position: absolute; left: 2px; color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 40px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .feat { background: var(--bg); padding: 26px 24px 28px; }
+  .feat .ic { font: 600 12px var(--mono); color: var(--accent); letter-spacing: 1px; }
+  .feat h3 { margin: 10px 0 8px; font-size: 18px; letter-spacing: -.2px; }
+  .feat p { margin: 0; color: var(--muted); font-size: 15px; }
+  kbd { font: 12px var(--mono); padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--bg-2); color: var(--text); white-space: nowrap; }
+
+  .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px; }
+  .key { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; background: var(--bg-2); }
+  .key kbd { font-size: 14px; padding: 3px 9px; }
+  .key div { margin-top: 10px; color: var(--muted); font-size: 14px; }
+
+  .principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
+  .pr { border-left: 2px solid var(--accent); padding: 4px 0 4px 20px; }
+  .pr h3 { margin: 0 0 8px; font-size: 18px; }
+  .pr p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .status { margin: 88px 0 0; border: 1px solid var(--line); border-radius: 14px; padding: 36px; background: linear-gradient(135deg, #1a2026, #12171b); display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px; align-items: center; }
+  .status h2 { margin-top: 0; }
+  .status p { color: var(--muted); margin: 0 0 10px; }
+  .pill { display: inline-block; font: 600 12px var(--mono); padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(126,224,161,.4); color: var(--green); }
+  .status dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; }
+  .status dt { color: var(--faint); font-family: var(--mono); font-size: 12px; padding-top: 2px; }
+  .status dd { margin: 0; }
+
+  footer { margin-top: 88px; border-top: 1px solid var(--line); padding: 28px 0 44px; color: var(--faint); font-size: 13px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  footer p { margin: 0; max-width: 720px; }
+
+  [data-lang] { display: none; }
+  html[lang="en"] [data-lang="en"], html[lang="de"] [data-lang="de"] { display: revert; }
+
+  @media (max-width: 900px) {
+    .panes { grid-template-columns: 1fr; }
+    .graph { min-height: 360px; border-right: 0; border-bottom: 1px solid var(--line); }
+    .grid, .principles { grid-template-columns: 1fr; }
+    .why, .status { grid-template-columns: 1fr; }
+    .keys { grid-template-columns: repeat(2, 1fr); }
+    nav.links a.hide-sm { display: none; }
+  }
+  @media (max-width: 560px) {
+    .graph { min-height: 300px; }
+    .graph .card, .graph svg.wires { zoom: .7; }
+    .mock-bar .crumb { display: none; }
+    .mock-status { flex-wrap: wrap; gap: 6px 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="Restage">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#182027" stroke="#26313a"/><path d="M9 23V9h7.5a4.5 4.5 0 0 1 0 9H13m3.5 0L22 23" fill="none" stroke="#f2b33d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Restage
+    </a>
+    <nav class="links">
+      <a class="hide-sm" href="#why"><span data-lang="en">Why</span><span data-lang="de">Warum</span></a>
+      <a class="hide-sm" href="#features"><span data-lang="en">Features</span><span data-lang="de">Funktionen</span></a>
+      <a class="hide-sm" href="#principles"><span data-lang="en">Principles</span><span data-lang="de">Prinzipien</span></a>
+      <span class="lang" role="group" aria-label="Language">
+        <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-set-lang="de" aria-pressed="false">DE</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="eyebrow">Flow editor for IBM DataStage · CP4D · IBM Cloud</div>
+    <h1>
+      <span data-lang="en">DataStage,<br>the way it should<br>have been. <span class="re">Restage.</span></span>
+      <span data-lang="de">DataStage,<br>wie es immer hätte<br>sein sollen. <span class="re">Restage.</span></span>
+    </h1>
+    <p class="lede">
+      <span data-lang="en">A keyboard-first editor for DataStage flows. Graph and code side by side, always in sync, nothing hidden behind “…”. Built by DataStage developers for DataStage developers. The goal: everyday work ten times faster than with the standard canvas.</span>
+      <span data-lang="de">Ein Editor für DataStage-Flows, der für die Tastatur gemacht ist. Graph und Code nebeneinander, immer synchron, nichts versteckt hinter „…“. Von DataStage-Entwicklern für DataStage-Entwickler. Das Ziel: die tägliche Arbeit zehnmal schneller als mit dem Standard-Canvas.</span>
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#features"><span data-lang="en">See what it does</span><span data-lang="de">Was es kann</span> →</a>
+      <a class="btn" href="#status"><span data-lang="en">Project status</span><span data-lang="de">Projektstand</span></a>
+    </div>
+
+    <div class="mock" role="img" aria-label="Restage editor: graph on the left, OSH text on the right">
+      <div class="mock-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="crumb">DEV · <b>DWH_Load</b> / <b>kunden_segment.flow</b></span>
+        <span class="sync">⇄ sync</span>
+      </div>
+      <div class="panes">
+        <div class="graph" aria-hidden="true">
+          <svg class="wires" aria-hidden="true">
+            <g fill="none" stroke="#3a4752" stroke-width="1.6">
+              <path d="M190 68 C 228 68, 224 170, 262 170"/>
+              <path d="M190 256 C 228 256, 224 196, 262 196"/>
+              <path d="M346 219 L 346 262" stroke="#f2b33d" stroke-width="2"/>
+            </g>
+          </svg>
+          <div class="card" style="left:22px; top:30px">
+            <div class="h"><b>kunden</b><span>db2</span></div>
+            <div class="b"><span class="kw">select</span> id, name
+<span class="kw">from</span> stg.kunde</div>
+          </div>
+          <div class="card" style="left:22px; top:218px">
+            <div class="h"><b>seg</b><span>db2</span></div>
+            <div class="b"><span class="kw">select</span> id, seg
+<span class="kw">from</span> stg.segment</div>
+          </div>
+          <div class="card" style="left:262px; top:142px">
+            <div class="h"><b>join_1</b><span>join</span></div>
+            <div class="b">key <span class="nm">id</span> · inner
+▸ cols (3)</div>
+          </div>
+          <div class="card sel" style="left:262px; top:262px">
+            <div class="h"><b>transformer_1</b><span>xfm</span></div>
+            <div class="b">name = <span class="fn">upper</span>(name)
+where seg = <span class="st">'A'</span></div>
+          </div>
+        </div>
+        <div class="code" aria-hidden="true">
+<span class="ln" data-n="1"><span class="fn">db2</span> -con <span class="nm">DWH</span> -sql {</span>
+<span class="ln" data-n="2">  <span class="kw">select</span> id, name</span>
+<span class="ln" data-n="3">  <span class="kw">from</span> stg.kunde</span>
+<span class="ln" data-n="4">} &gt; kunden;</span>
+<span class="ln" data-n="5"> </span>
+<span class="ln" data-n="6"><span class="fn">db2</span> -con <span class="nm">DWH</span> -sql <span class="st">"select id, seg from stg.segment"</span> &gt; seg;</span>
+<span class="ln" data-n="7"> </span>
+<span class="ln" data-n="8"><span class="fn">join</span> -key id kunden seg</span>
+<span class="ln hl" data-n="9">  | <span class="fn">transformer</span> -map <span class="st">"name = upper(name)"</span> -where <span class="st">"seg = 'A'"</span><span class="caret"></span></span>
+<span class="ln" data-n="10">  | <span class="fn">peek</span> -nrecs 10</span>
+        </div>
+      </div>
+      <div class="mock-status">
+        <span><kbd>j</kbd>/<kbd>k</kbd> stage</span><span><kbd>e</kbd> → text</span><span><kbd>n</kbd> new stage</span><span><kbd>?</kbd> shortcuts</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="why">
+    <div class="wrap">
+      <div class="eyebrow"><span data-lang="en">Why</span><span data-lang="de">Warum</span></div>
+      <h2>
+        <span data-lang="en">Developers think in text, keys and diffs. The canvas makes them click.</span>
+        <span data-lang="de">Entwickler denken in Text, Tasten und Diffs. Der Canvas lässt sie klicken.</span>
+      </h2>
+      <p class="sub">
+        <span data-lang="en">DataStage is a powerful engine with an interface that slows down the people who use it most. Restage keeps the engine, the projects and the flow format, and replaces the way you work on them.</span>
+        <span data-lang="de">DataStage ist eine starke Engine mit einer Oberfläche, die gerade die bremst, die sie am meisten nutzen. Restage behält Engine, Projekte und Flow-Format und ersetzt die Art, wie man daran arbeitet.</span>
+      </p>
+      <div class="why">
+        <div class="col old">
+          <h3><span data-lang="en">Standard canvas</span><span data-lang="de">Standard-Canvas</span></h3>
+          <ul>
+            <li><span data-lang="en">SQL, conditions and derivations cut off with “…”</span><span data-lang="de">SQL, Bedingungen und Herleitungen mit „…“ abgeschnitten</span></li>
+            <li><span data-lang="en">One dialog per property, one click per step</span><span data-lang="de">Ein Dialog je Eigenschaft, ein Klick je Schritt</span></li>
+            <li><span data-lang="en">No text view you can edit</span><span data-lang="de">Keine Textansicht, die man bearbeiten kann</span></li>
+            <li><span data-lang="en">Restructuring means deleting and rewiring by hand</span><span data-lang="de">Umbauen heißt löschen und von Hand neu verdrahten</span></li>
+            <li><span data-lang="en">Hard to compare, merge or version flows</span><span data-lang="de">Flows schwer zu vergleichen, zusammenzuführen, zu versionieren</span></li>
+          </ul>
+        </div>
+        <div class="col new">
+          <h3>Restage</h3>
+          <ul>
+            <li><span data-lang="en">Everything important visible in full, right on the card</span><span data-lang="de">Alles Wichtige vollständig sichtbar, direkt auf der Karte</span></li>
+            <li><span data-lang="en">Keyboard shortcuts for every action, searchable with <kbd>?</kbd></span><span data-lang="de">Tastenkürzel für jede Aktion, durchsuchbar mit <kbd>?</kbd></span></li>
+            <li><span data-lang="en">Compact OSH text, editable, live-synced with the graph</span><span data-lang="de">Kompakter OSH-Text, bearbeitbar, live mit dem Graph synchron</span></li>
+            <li><span data-lang="en">Refactorings: insert, replace, bypass, rewire in one step</span><span data-lang="de">Refactorings: einsetzen, ersetzen, überbrücken, umhängen in einem Schritt</span></li>
+            <li><span data-lang="en">Diff, three-way merge, export to files and Git</span><span data-lang="de">Diff, Drei-Wege-Merge, Export in Dateien und Git</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="eyebrow"><span data-lang="en">Features</span><span data-lang="de">Funktionen</span></div>
+      <h2>
+        <span data-lang="en">Everything a DataStage developer does every day, made fast.</span>
+        <span data-lang="de">Alles, was ein DataStage-Entwickler täglich tut, nur schnell.</span>
+      </h2>
+      <div class="grid">
+        <div class="feat">
+          <div class="ic">01 · SYNC</div>
+          <h3><span data-lang="en">Graph and text, both editable</span><span data-lang="de">Graph und Text, beide bearbeitbar</span></h3>
+          <p><span data-lang="en">Change the graph and the text follows instantly. Type in the text and the graph redraws with every keystroke. Selecting a stage or column jumps to its exact place.</span><span data-lang="de">Ändert man den Graph, folgt der Text sofort. Tippt man im Text, zeichnet sich der Graph mit jedem Tastendruck neu. Eine gewählte Stage oder Spalte springt an ihre genaue Stelle.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">02 · CLARITY</div>
+          <h3><span data-lang="en">Nothing hidden</span><span data-lang="de">Nichts versteckt</span></h3>
+          <p><span data-lang="en">User-defined SQL (formatted and highlighted), conditions and column derivations are shown in full on compact cards, with three levels of detail.</span><span data-lang="de">User-Defined SQL (formatiert, mit Farben), Bedingungen und Herleitungen stehen vollständig auf kompakten Karten, in drei Detailstufen.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">03 · KEYBOARD</div>
+          <h3><span data-lang="en">Keyboard-first</span><span data-lang="de">Für die Tastatur gemacht</span></h3>
+          <p><span data-lang="en">Navigate with <kbd>j</kbd> <kbd>k</kbd> <kbd>h</kbd> <kbd>l</kbd>, add a stage with <kbd>n</kbd>, replace it with <kbd>s</kbd>, edit in text with <kbd>e</kbd>. Like Gmail, for flows.</span><span data-lang="de">Navigieren mit <kbd>j</kbd> <kbd>k</kbd> <kbd>h</kbd> <kbd>l</kbd>, neue Stage mit <kbd>n</kbd>, ersetzen mit <kbd>s</kbd>, im Text bearbeiten mit <kbd>e</kbd>. Wie Gmail, nur für Flows.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">04 · REFACTOR</div>
+          <h3><span data-lang="en">Refactorings, not rewiring</span><span data-lang="de">Refactorings statt Neuverdrahten</span></h3>
+          <p><span data-lang="en">Insert a stage into a link, swap a stage’s type and keep its links, bypass a stage, split or merge lookups and joins, copy and paste groups of stages.</span><span data-lang="de">Stage in einen Link einsetzen, Art einer Stage tauschen und Links behalten, Stage überbrücken, Lookups und Joins aufteilen oder zusammenführen, Stage-Gruppen kopieren.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">05 · COLUMNS</div>
+          <h3><span data-lang="en">Columns where they belong</span><span data-lang="de">Spalten, wo sie hingehören</span></h3>
+          <p><span data-lang="en">Define columns only at sources, or derive them from the SQL. Everything downstream is propagated, with column lineage highlighted across the flow.</span><span data-lang="de">Spalten nur an den Quellen angeben oder aus dem SQL ableiten. Alles danach wird weitergegeben, die Abstammung jeder Spalte ist im Flow hervorhebbar.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">06 · PROJECT</div>
+          <h3><span data-lang="en">Search the whole project</span><span data-lang="de">Das ganze Projekt durchsuchen</span></h3>
+          <p><span data-lang="en">All flows are indexed in the background: full-text search, dependencies between flows, and scoped search &amp; replace inside a flow.</span><span data-lang="de">Alle Flows werden im Hintergrund gelesen: Volltextsuche, Abhängigkeiten zwischen Flows und eingegrenztes Suchen &amp; Ersetzen im Flow.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">07 · VERSIONS</div>
+          <h3><span data-lang="en">Diff, merge, Git</span><span data-lang="de">Diff, Merge, Git</span></h3>
+          <p><span data-lang="en">Compare any two versions, merge your changes with what a colleague saved on the server, export flows as text files and version them with Git.</span><span data-lang="de">Zwei beliebige Stände vergleichen, eigene Änderungen mit dem Stand auf dem Server zusammenführen, Flows als Textdateien exportieren und mit Git versionieren.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">08 · FEEDBACK</div>
+          <h3><span data-lang="en">Compile, run, fix</span><span data-lang="de">Kompilieren, ausführen, beheben</span></h3>
+          <p><span data-lang="en"><kbd>Ctrl+Enter</kbd> compiles, <kbd>Alt+R</kbd> runs the job and shows the log. Compiler errors are underlined at the exact spot in the text, not just on the stage.</span><span data-lang="de"><kbd>Strg+Enter</kbd> kompiliert, <kbd>Alt+R</kbd> startet den Job und zeigt das Log. Fehler des Compilers sind genau an der Stelle im Text unterringelt, nicht nur an der Stage.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">09 · ANYWHERE</div>
+          <h3><span data-lang="en">On-prem and IBM Cloud</span><span data-lang="de">On-Prem und IBM Cloud</span></h3>
+          <p><span data-lang="en">Connect to several Cloud Pak for Data instances and to DataStage on IBM Cloud at once. Each connection only offers the stages its environment supports.</span><span data-lang="de">Mehrere Cloud-Pak-for-Data-Instanzen und DataStage in der IBM Cloud gleichzeitig anbinden. Jede Verbindung bietet nur die Stages an, die ihre Umgebung kennt.</span></p>
+        </div>
+      </div>
+
+      <div class="keys">
+        <div class="key"><kbd>Ctrl+P</kbd><div><span data-lang="en">Open any flow</span><span data-lang="de">Flow öffnen</span></div></div>
+        <div class="key"><kbd>n</kbd><div><span data-lang="en">New stage, or insert into the selected link</span><span data-lang="de">Neue Stage, oder in den gewählten Link einsetzen</span></div></div>
+        <div class="key"><kbd>Shift+L</kbd><div><span data-lang="en">Show column lineage</span><span data-lang="de">Abstammung der Spalte zeigen</span></div></div>
+        <div class="key"><kbd>Alt+V</kbd><div><span data-lang="en">Compare versions</span><span data-lang="de">Stände vergleichen</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="principles">
+    <div class="wrap">
+      <div class="eyebrow"><span data-lang="en">Principles</span><span data-lang="de">Prinzipien</span></div>
+      <h2>
+        <span data-lang="en">A better editor, not a different platform.</span>
+        <span data-lang="de">Ein besserer Editor, keine andere Plattform.</span>
+      </h2>
+      <div class="principles">
+        <div class="pr">
+          <h3><span data-lang="en">Lossless</span><span data-lang="de">Verlustfrei</span></h3>
+          <p><span data-lang="en">The CP4D pipeline-flow JSON is the source of truth. Whatever Restage does not know is kept untouched; text → flow → JSON reproduces the original.</span><span data-lang="de">Das pipeline-flow-JSON von CP4D ist die Quelle der Wahrheit. Was Restage nicht kennt, bleibt unberührt; Text → Flow → JSON ergibt wieder das Original.</span></p>
+        </div>
+        <div class="pr">
+          <h3><span data-lang="en">No lock-in</span><span data-lang="de">Keine Bindung</span></h3>
+          <p><span data-lang="en">Flows are saved straight back to Cloud Pak for Data. Open them in the standard canvas at any time; the team can mix both tools.</span><span data-lang="de">Flows werden direkt in Cloud Pak for Data gespeichert. Sie lassen sich jederzeit im Standard-Canvas öffnen; im Team können beide Werkzeuge nebeneinander laufen.</span></p>
+        </div>
+        <div class="pr">
+          <h3><span data-lang="en">Your secrets stay yours</span><span data-lang="de">Geheimnisse bleiben bei dir</span></h3>
+          <p><span data-lang="en">Runs locally on your machine, or as a web app with per-user connections. API keys never land in a file; your CP4D permissions stay exactly as they are.</span><span data-lang="de">Läuft lokal auf dem eigenen Rechner oder als Web-Anwendung mit Verbindungen je Benutzer. API-Keys landen nie in einer Datei; die Rechte im CP4D bleiben genau, wie sie sind.</span></p>
+        </div>
+      </div>
+
+      <div class="status" id="status">
+        <div>
+          <span class="pill">● <span data-lang="en">in active development</span><span data-lang="de">in aktiver Entwicklung</span></span>
+          <h2 style="margin-top:14px">
+            <span data-lang="en">Used in real projects today.</span>
+            <span data-lang="de">Heute schon in echten Projekten im Einsatz.</span>
+          </h2>
+          <p><span data-lang="en">Restage is developed by TR IT Consulting and used daily on DataStage projects on Cloud Pak for Data 5.x and IBM Cloud. It is not publicly available yet.</span><span data-lang="de">Restage wird von TR IT Consulting entwickelt und täglich in DataStage-Projekten auf Cloud Pak for Data 5.x und IBM Cloud eingesetzt. Öffentlich verfügbar ist es noch nicht.</span></p>
+          <p><span data-lang="en">Interested in using it in your team? Get in touch with TR IT Consulting.</span><span data-lang="de">Interesse am Einsatz im eigenen Team? Sprich TR IT Consulting an.</span></p>
+        </div>
+        <dl>
+          <dt>TARGET</dt><dd>IBM DataStage · Cloud Pak for Data 5.x · IBM Cloud</dd>
+          <dt>RUNS</dt><dd><span data-lang="en">Locally (Node.js 22) or as a web app</span><span data-lang="de">Lokal (Node.js 22) oder als Web-Anwendung</span></dd>
+          <dt>UI</dt><dd><span data-lang="en">English and German</span><span data-lang="de">Deutsch und Englisch</span></dd>
+          <dt>BY</dt><dd>TR IT Consulting · Sofia</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <span data-lang="en">IBM, DataStage and Cloud Pak are trademarks of International Business Machines Corporation. Restage is an independent product and is not affiliated with or endorsed by IBM.</span>
+      <span data-lang="de">IBM, DataStage und Cloud Pak sind Marken der International Business Machines Corporation. Restage ist ein unabhängiges Produkt und steht in keiner Verbindung zu IBM.</span>
+    </p>
+    <p>© 2026 TR IT Consulting</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var KEY = "restage-lang";
+    function apply(lang) {
+      document.documentElement.lang = lang;
+      var btns = document.querySelectorAll("[data-set-lang]");
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-set-lang") === lang ? "true" : "false");
+      }
+      document.title = lang === "de"
+        ? "Restage – DataStage, wie es immer hätte sein sollen"
+        : "Restage – DataStage, the way it should have been";
+    }
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    var initial = saved || ((navigator.language || "en").toLowerCase().indexOf("de") === 0 ? "de" : "en");
+    apply(initial);
+    document.addEventListener("click", function (ev) {
+      var b = ev.target.closest && ev.target.closest("[data-set-lang]");
+      if (!b) return;
+      var lang = b.getAttribute("data-set-lang");
+      apply(lang);
+      try { localStorage.setItem(KEY, lang); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>
