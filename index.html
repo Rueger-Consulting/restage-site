@@ -92,6 +92,11 @@
   section { padding: 88px 0 0; }
   h2 { font-size: clamp(28px, 3.6vw, 40px); letter-spacing: -.8px; line-height: 1.12; margin: 12px 0 16px; }
   .sub { color: var(--muted); max-width: 760px; font-size: 18px; margin: 0; }
+  .dropin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 32px; }
+  .di { border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px 24px; background: linear-gradient(160deg, rgba(242,179,61,.07), transparent 55%), var(--bg-2); }
+  .di-n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--mono); color: var(--accent-ink); background: var(--accent); }
+  .di h3 { margin: 14px 0 8px; font-size: 18px; letter-spacing: -.2px; }
+  .di p { margin: 0; color: var(--muted); font-size: 15px; }
   .why { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
   .why .col { border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; background: var(--bg-2); }
   .why .col h3 { margin: 0 0 12px; font-size: 15px; font-family: var(--mono); letter-spacing: .5px; }
@@ -148,7 +153,7 @@
     .panes { grid-template-columns: 1fr; }
     .graph { min-height: 360px; border-right: 0; border-bottom: 1px solid var(--line); }
     .grid, .principles { grid-template-columns: 1fr; }
-    .why, .status { grid-template-columns: 1fr; }
+    .why, .status, .dropin-grid { grid-template-columns: 1fr; }
     .keys { grid-template-columns: repeat(2, 1fr); }
     nav.links a.hide-sm { display: none; }
   }
@@ -170,6 +175,7 @@
       Restage
     </a>
     <nav class="links">
+      <a class="hide-sm" href="#dropin"><span data-lang="en">Setup</span><span data-lang="de">Einsatz</span></a>
       <a class="hide-sm" href="#why"><span data-lang="en">Why</span><span data-lang="de">Warum</span></a>
       <a class="hide-sm" href="#lineage"><span data-lang="en">Lineage</span><span data-lang="de">Abstammung</span></a>
       <a class="hide-sm" href="#features"><span data-lang="en">Features</span><span data-lang="de">Funktionen</span></a>
@@ -190,8 +196,8 @@
       <span data-lang="de">DataStage,<br>wie es immer hätte<br>sein sollen. <span class="re">Restage.</span></span>
     </h1>
     <p class="lede">
-      <span data-lang="en">A keyboard-first editor for DataStage flows. Graph and code side by side, always in sync, nothing hidden behind “…”. Built by DataStage developers for DataStage developers. The goal: everyday work ten times faster than with the standard canvas.</span>
-      <span data-lang="de">Ein Editor für DataStage-Flows, der für die Tastatur gemacht ist. Graph und Code nebeneinander, immer synchron, nichts versteckt hinter „…“. Von DataStage-Entwicklern für DataStage-Entwickler. Das Ziel: die tägliche Arbeit zehnmal schneller als mit dem Standard-Canvas.</span>
+      <span data-lang="en">A keyboard-first editor for DataStage flows. Graph and code side by side, always in sync, nothing hidden behind “…”. Built by DataStage developers for DataStage developers. The goal: everyday work ten times faster than with the standard canvas. It runs on top of your existing Cloud Pak for Data – nothing to install there, nothing to migrate.</span>
+      <span data-lang="de">Ein Editor für DataStage-Flows, der für die Tastatur gemacht ist. Graph und Code nebeneinander, immer synchron, nichts versteckt hinter „…“. Von DataStage-Entwicklern für DataStage-Entwickler. Das Ziel: die tägliche Arbeit zehnmal schneller als mit dem Standard-Canvas. Es setzt auf dein bestehendes Cloud Pak for Data auf – dort ist nichts zu installieren und nichts zu migrieren.</span>
     </p>
     <div class="cta">
       <a class="btn primary" href="#features"><span data-lang="en">See what it does</span><span data-lang="de">Was es kann</span> →</a>
@@ -301,6 +307,33 @@ where cs.seg = <span class="st">'A'</span></div>
       </div>
     </div>
   </div>
+
+  <section id="dropin" class="dropin">
+    <div class="wrap">
+      <div class="eyebrow"><span data-lang="en">Drop-in</span><span data-lang="de">Ohne Umbau</span></div>
+      <h2>
+        <span data-lang="en">Point it at your CP4D. Keep working on what you have.</span>
+        <span data-lang="de">Auf dein CP4D zeigen. An dem weiterarbeiten, was da ist.</span>
+      </h2>
+      <div class="dropin-grid">
+        <div class="di">
+          <div class="di-n">1</div>
+          <h3><span data-lang="en">No changes to Cloud Pak for Data</span><span data-lang="de">Keine Änderung am Cloud Pak for Data</span></h3>
+          <p><span data-lang="en">Restage talks to CP4D through its regular API, with your own API key and your existing permissions. No server-side installation, no plugin, no admin rights, no change to the cluster.</span><span data-lang="de">Restage spricht über die reguläre API mit CP4D, mit deinem eigenen API-Key und deinen bestehenden Rechten. Keine Installation auf dem Server, kein Plugin, keine Admin-Rechte, keine Änderung am Cluster.</span></p>
+        </div>
+        <div class="di">
+          <div class="di-n">2</div>
+          <h3><span data-lang="en">Your existing projects, as they are</span><span data-lang="de">Bestehende Projekte, so wie sie sind</span></h3>
+          <p><span data-lang="en">Open any DataStage flow of an existing project directly – no import, no conversion. Saving writes the standard pipeline-flow JSON back to CP4D, losslessly; properties Restage does not know stay untouched.</span><span data-lang="de">Jeden DataStage-Flow eines bestehenden Projekts direkt öffnen – ohne Import, ohne Umwandlung. Speichern schreibt das Standard-pipeline-flow-JSON verlustfrei zurück ins CP4D; Eigenschaften, die Restage nicht kennt, bleiben unberührt.</span></p>
+        </div>
+        <div class="di">
+          <div class="di-n">3</div>
+          <h3><span data-lang="en">Side by side with the CP4D canvas</span><span data-lang="de">Parallel zum CP4D-Canvas</span></h3>
+          <p><span data-lang="en">The team can keep using the regular CP4D flow designer on the same projects. <kbd>Alt+O</kbd> opens the current flow there; if someone changed it in the meantime, Restage shows the difference and merges both versions.</span><span data-lang="de">Das Team kann auf denselben Projekten weiter mit dem regulären CP4D-Flow-Designer arbeiten. <kbd>Alt+O</kbd> öffnet den aktuellen Flow dort; hat ihn jemand zwischendurch geändert, zeigt Restage den Unterschied und führt beide Stände zusammen.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section id="why">
     <div class="wrap">
@@ -464,7 +497,7 @@ where cs.seg = <span class="st">'A'</span></div>
         </div>
         <div class="pr">
           <h3><span data-lang="en">No lock-in</span><span data-lang="de">Keine Bindung</span></h3>
-          <p><span data-lang="en">Flows are saved straight back to Cloud Pak for Data. Open them in the standard canvas at any time; the team can mix both tools.</span><span data-lang="de">Flows werden direkt in Cloud Pak for Data gespeichert. Sie lassen sich jederzeit im Standard-Canvas öffnen; im Team können beide Werkzeuge nebeneinander laufen.</span></p>
+          <p><span data-lang="en">Flows stay in Cloud Pak for Data, in its own format. Stop using Restage any day – nothing has to be moved back or converted.</span><span data-lang="de">Die Flows bleiben im Cloud Pak for Data, in dessen eigenem Format. Wer Restage nicht mehr nutzt, muss nichts zurückholen oder umwandeln.</span></p>
         </div>
         <div class="pr">
           <h3><span data-lang="en">Your secrets stay yours</span><span data-lang="de">Geheimnisse bleiben bei dir</span></h3>
