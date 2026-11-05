@@ -111,6 +111,11 @@
   .feat p { margin: 0; color: var(--muted); font-size: 15px; }
   kbd { font: 12px var(--mono); padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--bg-2); color: var(--text); white-space: nowrap; }
 
+  .shot { margin: 36px 0 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); }
+  .shot img { display: none; width: 100%; height: auto; }
+  html[lang="en"] .shot img[data-lang="en"], html[lang="de"] .shot img[data-lang="de"] { display: block; }
+  .shot figcaption { background: var(--bg-2); border-top: 1px solid var(--line); padding: 12px 18px; color: var(--muted); font-size: 14px; }
+  code { font: 0.9em var(--mono); color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
   .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px; }
   .key { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; background: var(--bg-2); }
   .key kbd { font-size: 14px; padding: 3px 9px; }
@@ -163,6 +168,7 @@
     </a>
     <nav class="links">
       <a class="hide-sm" href="#why"><span data-lang="en">Why</span><span data-lang="de">Warum</span></a>
+      <a class="hide-sm" href="#lineage"><span data-lang="en">Lineage</span><span data-lang="de">Abstammung</span></a>
       <a class="hide-sm" href="#features"><span data-lang="en">Features</span><span data-lang="de">Funktionen</span></a>
       <a class="hide-sm" href="#principles"><span data-lang="en">Principles</span><span data-lang="de">Prinzipien</span></a>
       <span class="lang" role="group" aria-label="Language">
@@ -221,8 +227,8 @@
           </div>
           <div class="card sel" style="left:262px; top:262px">
             <div class="h"><b>transformer_1</b><span>xfm</span></div>
-            <div class="b">name = <span class="fn">upper</span>(name)
-where seg = <span class="st">'A'</span></div>
+            <div class="b">name = <span class="fn">UpCase</span>(kd.name)
+where kd.seg = <span class="st">'A'</span></div>
           </div>
         </div>
         <div class="code" aria-hidden="true">
@@ -233,9 +239,10 @@ where seg = <span class="st">'A'</span></div>
 <span class="ln" data-n="5"> </span>
 <span class="ln" data-n="6"><span class="fn">db2</span> -con <span class="nm">DWH</span> -sql <span class="st">"select id, seg from stg.segment"</span> &gt; seg;</span>
 <span class="ln" data-n="7"> </span>
-<span class="ln" data-n="8"><span class="fn">join</span> -key id kunden seg</span>
-<span class="ln hl" data-n="9">  | <span class="fn">transformer</span> -map <span class="st">"name = upper(name)"</span> -where <span class="st">"seg = 'A'"</span><span class="caret"></span></span>
-<span class="ln" data-n="10">  | <span class="fn">peek</span> -nrecs 10</span>
+<span class="ln" data-n="8"><span class="fn">join</span> -key id kunden seg &gt; kd</span>
+<span class="ln hl" data-n="9">  | <span class="fn">transformer</span> -where <span class="st">"kd.seg = 'A'"</span></span>
+<span class="ln hl" data-n="10">      -map <span class="st">"kd.*, name = UpCase(kd.name)"</span><span class="caret"></span></span>
+<span class="ln" data-n="11">  | <span class="fn">peek</span> -nrecs 10</span>
         </div>
       </div>
       <div class="mock-status">
@@ -277,6 +284,28 @@ where seg = <span class="st">'A'</span></div>
           </ul>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="lineage">
+    <div class="wrap">
+      <div class="eyebrow"><span data-lang="en">Column lineage</span><span data-lang="de">Abstammung der Spalten</span></div>
+      <h2>
+        <span data-lang="en">Where does this column come from? One click.</span>
+        <span data-lang="de">Woher kommt diese Spalte? Ein Klick.</span>
+      </h2>
+      <p class="sub">
+        <span data-lang="en">Select a column and Restage traces it through the flow: the links of the chain light up, uninvolved stages step back, and the inspector lists every step with its derivation – from the source to the target.</span>
+        <span data-lang="de">Spalte anklicken, und Restage verfolgt sie durch den Flow: die Links der Kette leuchten auf, unbeteiligte Stages treten zurück, und der Inspektor nennt jeden Schritt mit seiner Herleitung – von der Quelle bis zum Ziel.</span>
+      </p>
+      <figure class="shot">
+        <img data-lang="en" src="lineage-en.webp" width="1440" height="602" loading="lazy" alt="Restage: lineage of the column NAME from the source kunde through the join kd_join to the transformer name_upcase, with the lineage panel in the inspector">
+        <img data-lang="de" src="lineage-de.webp" width="1440" height="704" loading="lazy" alt="Restage: Abstammung der Spalte NAME von der Quelle kunde über den Join kd_join bis zum Transformer name_upcase, mit dem Abstammungs-Panel im Inspektor">
+        <figcaption>
+          <span data-lang="en">Real screenshot. <kbd>Shift+L</kbd> toggles lineage; the panel shows the source, the unchanged pass-through and the <code>UpCase(kd.NAME)</code> derivation.</span>
+          <span data-lang="de">Echter Screenshot. <kbd>Umschalt+L</kbd> schaltet die Abstammung ein; das Panel zeigt Quelle, unverändertes Durchreichen und die Herleitung <code>UpCase(kd.NAME)</code>.</span>
+        </figcaption>
+      </figure>
     </div>
   </section>
 
@@ -329,14 +358,29 @@ where seg = <span class="st">'A'</span></div>
           <p><span data-lang="en"><kbd>Ctrl+Enter</kbd> compiles, <kbd>Alt+R</kbd> runs the job and shows the log. Compiler errors are underlined at the exact spot in the text, not just on the stage.</span><span data-lang="de"><kbd>Strg+Enter</kbd> kompiliert, <kbd>Alt+R</kbd> startet den Job und zeigt das Log. Fehler des Compilers sind genau an der Stelle im Text unterringelt, nicht nur an der Stage.</span></p>
         </div>
         <div class="feat">
-          <div class="ic">09 · ANYWHERE</div>
+          <div class="ic">09 · RENAME</div>
+          <h3><span data-lang="en">Bulk rename, safely</span><span data-lang="de">Massen-Umbenennen, sicher</span></h3>
+          <p><span data-lang="en">Rename many stages, links or columns in one go – with regular expressions, a preview of every change, and all references following along: derivations, conditions, keys, even <code>ORCHESTRATE.col</code> in SQL.</span><span data-lang="de">Viele Stages, Links oder Spalten in einem Rutsch umbenennen – mit regulären Ausdrücken, Vorschau jeder Änderung, und alle Verweise ziehen mit: Herleitungen, Bedingungen, Schlüssel, sogar <code>ORCHESTRATE.SPALTE</code> im SQL.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">10 · SQL</div>
+          <h3><span data-lang="en">Columns from the SQL</span><span data-lang="de">Spalten aus dem SQL</span></h3>
+          <p><span data-lang="en">For database sources, names, order, types and nullability are derived from the SELECT – joins, CASE, CAST, WITH and UNION included – and checked against the tables.</span><span data-lang="de">Bei Datenbank-Quellen ergeben sich Namen, Reihenfolge, Typen und Nullbarkeit aus dem SELECT – samt Joins, CASE, CAST, WITH und UNION – und werden gegen die Tabellen geprüft.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">11 · UNDO</div>
+          <h3><span data-lang="en">Everything undoable</span><span data-lang="de">Alles rückgängig</span></h3>
+          <p><span data-lang="en">Every action is one step in the undo history – a refactoring, a paste of twenty stages, or a rename across the whole flow. <kbd>z</kbd> takes it back.</span><span data-lang="de">Jede Aktion ist ein Schritt im Verlauf – ein Refactoring, das Einfügen von zwanzig Stages oder ein Umbenennen im ganzen Flow. <kbd>z</kbd> nimmt es zurück.</span></p>
+        </div>
+        <div class="feat">
+          <div class="ic">12 · ANYWHERE</div>
           <h3><span data-lang="en">On-prem and IBM Cloud</span><span data-lang="de">On-Prem und IBM Cloud</span></h3>
           <p><span data-lang="en">Connect to several Cloud Pak for Data instances and to DataStage on IBM Cloud at once. Each connection only offers the stages its environment supports.</span><span data-lang="de">Mehrere Cloud-Pak-for-Data-Instanzen und DataStage in der IBM Cloud gleichzeitig anbinden. Jede Verbindung bietet nur die Stages an, die ihre Umgebung kennt.</span></p>
         </div>
       </div>
 
       <div class="keys">
-        <div class="key"><kbd>Ctrl+P</kbd><div><span data-lang="en">Open any flow</span><span data-lang="de">Flow öffnen</span></div></div>
+        <div class="key"><kbd>Shift+F</kbd><div><span data-lang="en">Find &amp; replace, bulk rename</span><span data-lang="de">Suchen &amp; Ersetzen, Massen-Umbenennen</span></div></div>
         <div class="key"><kbd>n</kbd><div><span data-lang="en">New stage, or insert into the selected link</span><span data-lang="de">Neue Stage, oder in den gewählten Link einsetzen</span></div></div>
         <div class="key"><kbd>Shift+L</kbd><div><span data-lang="en">Show column lineage</span><span data-lang="de">Abstammung der Spalte zeigen</span></div></div>
         <div class="key"><kbd>Alt+V</kbd><div><span data-lang="en">Compare versions</span><span data-lang="de">Stände vergleichen</span></div></div>
