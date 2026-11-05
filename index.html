@@ -111,11 +111,14 @@
   .feat p { margin: 0; color: var(--muted); font-size: 15px; }
   kbd { font: 12px var(--mono); padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--bg-2); color: var(--text); white-space: nowrap; }
 
-  .shot { margin: 36px 0 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); }
+  .shot { margin: 36px 0 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #14171c; box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); }
   .shot img { display: none; width: 100%; height: auto; }
   html[lang="en"] .shot img[data-lang="en"], html[lang="de"] .shot img[data-lang="de"] { display: block; }
   .shot figcaption { background: var(--bg-2); border-top: 1px solid var(--line); padding: 12px 18px; color: var(--muted); font-size: 14px; }
   code { font: 0.9em var(--mono); color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .split-fig { margin-top: 56px; }
+  .split-fig .fig-h { font-size: 22px; margin: 0 0 10px; letter-spacing: -.3px; }
+  .split-fig .shot { margin-top: 22px; }
   .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px; }
   .key { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; background: var(--bg-2); }
   .key kbd { font-size: 14px; padding: 3px 9px; }
@@ -198,9 +201,10 @@
     <div class="mock" role="img" aria-label="Restage editor: graph on the left, OSH text on the right">
       <div class="mock-bar">
         <span class="dots"><i></i><i></i><i></i></span>
-        <span class="crumb">DEV · <b>DWH_Load</b> / <b>kunden_segment.flow</b></span>
+        <span class="crumb">DEV · <b>DWH_Load</b> / <b data-lang="de">kunden_segment.flow</b><b data-lang="en">customer_segment.flow</b></span>
         <span class="sync">⇄ sync</span>
       </div>
+      <div data-lang="de">
       <div class="panes">
         <div class="graph" aria-hidden="true">
           <svg class="wires" aria-hidden="true">
@@ -244,6 +248,53 @@ where kd.seg = <span class="st">'A'</span></div>
 <span class="ln hl" data-n="10">      -map <span class="st">"kd.*, name = UpCase(kd.name)"</span><span class="caret"></span></span>
 <span class="ln" data-n="11">  | <span class="fn">peek</span> -nrecs 10</span>
         </div>
+      </div>
+      </div>
+      <div data-lang="en">
+      <div class="panes">
+        <div class="graph" aria-hidden="true">
+          <svg class="wires" aria-hidden="true">
+            <g fill="none" stroke="#3a4752" stroke-width="1.6">
+              <path d="M190 68 C 228 68, 224 170, 262 170"/>
+              <path d="M190 256 C 228 256, 224 196, 262 196"/>
+              <path d="M346 219 L 346 262" stroke="#f2b33d" stroke-width="2"/>
+            </g>
+          </svg>
+          <div class="card" style="left:22px; top:30px">
+            <div class="h"><b>customers</b><span>db2</span></div>
+            <div class="b"><span class="kw">select</span> id, name
+<span class="kw">from</span> stg.customer</div>
+          </div>
+          <div class="card" style="left:22px; top:218px">
+            <div class="h"><b>seg</b><span>db2</span></div>
+            <div class="b"><span class="kw">select</span> id, seg
+<span class="kw">from</span> stg.segment</div>
+          </div>
+          <div class="card" style="left:262px; top:142px">
+            <div class="h"><b>cust_join</b><span>join</span></div>
+            <div class="b">key <span class="nm">id</span> · inner
+▸ cols (3)</div>
+          </div>
+          <div class="card sel" style="left:262px; top:262px">
+            <div class="h"><b>transformer_1</b><span>xfm</span></div>
+            <div class="b">name = <span class="fn">UpCase</span>(cs.name)
+where cs.seg = <span class="st">'A'</span></div>
+          </div>
+        </div>
+        <div class="code" aria-hidden="true">
+<span class="ln" data-n="1"><span class="fn">db2</span> -con <span class="nm">DWH</span> -sql {</span>
+<span class="ln" data-n="2">  <span class="kw">select</span> id, name</span>
+<span class="ln" data-n="3">  <span class="kw">from</span> stg.customer</span>
+<span class="ln" data-n="4">} &gt; customers;</span>
+<span class="ln" data-n="5"> </span>
+<span class="ln" data-n="6"><span class="fn">db2</span> -con <span class="nm">DWH</span> -sql <span class="st">"select id, seg from stg.segment"</span> &gt; seg;</span>
+<span class="ln" data-n="7"> </span>
+<span class="ln" data-n="8"><span class="fn">join</span> -key id customers seg &gt; cs</span>
+<span class="ln hl" data-n="9">  | <span class="fn">transformer</span> -where <span class="st">"cs.seg = 'A'"</span></span>
+<span class="ln hl" data-n="10">      -map <span class="st">"cs.*, name = UpCase(cs.name)"</span><span class="caret"></span></span>
+<span class="ln" data-n="11">  | <span class="fn">peek</span> -nrecs 10</span>
+        </div>
+      </div>
       </div>
       <div class="mock-status">
         <span><kbd>j</kbd>/<kbd>k</kbd> stage</span><span><kbd>e</kbd> → text</span><span><kbd>n</kbd> new stage</span><span><kbd>?</kbd> shortcuts</span>
@@ -299,10 +350,10 @@ where kd.seg = <span class="st">'A'</span></div>
         <span data-lang="de">Spalte anklicken, und Restage verfolgt sie durch den Flow: die Links der Kette leuchten auf, unbeteiligte Stages treten zurück, und der Inspektor nennt jeden Schritt mit seiner Herleitung – von der Quelle bis zum Ziel.</span>
       </p>
       <figure class="shot">
-        <img data-lang="en" src="lineage-en.webp" width="1440" height="602" loading="lazy" alt="Restage: lineage of the column NAME from the source kunde through the join kd_join to the transformer name_upcase, with the lineage panel in the inspector">
-        <img data-lang="de" src="lineage-de.webp" width="1440" height="704" loading="lazy" alt="Restage: Abstammung der Spalte NAME von der Quelle kunde über den Join kd_join bis zum Transformer name_upcase, mit dem Abstammungs-Panel im Inspektor">
+        <img data-lang="en" src="lineage-en.webp" width="1440" height="603" loading="lazy" alt="Restage: lineage of the column NAME from the source customer through the join cust_join to the transformer name_upcase, with the lineage panel in the inspector">
+        <img data-lang="de" src="lineage-de.webp" width="1440" height="602" loading="lazy" alt="Restage: Abstammung der Spalte NAME von der Quelle kunde über den Join kd_join bis zum Transformer name_upcase, mit dem Abstammungs-Panel im Inspektor">
         <figcaption>
-          <span data-lang="en">Real screenshot. <kbd>Shift+L</kbd> toggles lineage; the panel shows the source, the unchanged pass-through and the <code>UpCase(kd.NAME)</code> derivation.</span>
+          <span data-lang="en">Real screenshot. <kbd>Shift+L</kbd> toggles lineage; the panel shows the source, the unchanged pass-through and the <code>UpCase(cs.NAME)</code> derivation.</span>
           <span data-lang="de">Echter Screenshot. <kbd>Umschalt+L</kbd> schaltet die Abstammung ein; das Panel zeigt Quelle, unverändertes Durchreichen und die Herleitung <code>UpCase(kd.NAME)</code>.</span>
         </figcaption>
       </figure>
@@ -385,6 +436,17 @@ where kd.seg = <span class="st">'A'</span></div>
         <div class="key"><kbd>Shift+L</kbd><div><span data-lang="en">Show column lineage</span><span data-lang="de">Abstammung der Spalte zeigen</span></div></div>
         <div class="key"><kbd>Alt+V</kbd><div><span data-lang="en">Compare versions</span><span data-lang="de">Stände vergleichen</span></div></div>
       </div>
+
+      <div class="split-fig">
+        <div>
+          <h3 class="fig-h"><span data-lang="en">Every shortcut, one keystroke away</span><span data-lang="de">Jedes Kürzel, einen Tastendruck entfernt</span></h3>
+          <p class="sub"><span data-lang="en">Press <kbd>?</kbd> in the graph and start typing: the help filters by key, name or effect – “zoom”, “undo”, <kbd>g i</kbd>. Navigation, editing, view, the column table and the mouse, all on one page.</span><span data-lang="de"><kbd>?</kbd> im Graph drücken und lostippen: die Hilfe filtert nach Taste, Name oder Wirkung – „zoom“, „rückgängig“, <kbd>g i</kbd>. Navigation, Bearbeiten, Ansicht, Spaltentabelle und Maus auf einer Seite.</span></p>
+        </div>
+        <figure class="shot">
+          <img data-lang="en" src="keys-en.webp" width="1060" height="550" loading="lazy" alt="Restage: searchable keyboard shortcut help in the graph, with sections navigation, view, column table, edit and mouse">
+          <img data-lang="de" src="keys-de.webp" width="1060" height="550" loading="lazy" alt="Restage: durchsuchbare Tastenkürzel-Hilfe im Graph mit den Abschnitten Navigation, Ansicht, Spaltentabelle, Bearbeiten und Maus">
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -417,14 +479,14 @@ where kd.seg = <span class="st">'A'</span></div>
             <span data-lang="en">Used in real projects today.</span>
             <span data-lang="de">Heute schon in echten Projekten im Einsatz.</span>
           </h2>
-          <p><span data-lang="en">Restage is developed by TR IT Consulting and used daily on DataStage projects on Cloud Pak for Data 5.x and IBM Cloud. It is not publicly available yet.</span><span data-lang="de">Restage wird von TR IT Consulting entwickelt und täglich in DataStage-Projekten auf Cloud Pak for Data 5.x und IBM Cloud eingesetzt. Öffentlich verfügbar ist es noch nicht.</span></p>
-          <p><span data-lang="en">Interested in using it in your team? Get in touch with TR IT Consulting.</span><span data-lang="de">Interesse am Einsatz im eigenen Team? Sprich TR IT Consulting an.</span></p>
+          <p><span data-lang="en">Restage is developed by Rueger Consulting and used daily on DataStage projects on Cloud Pak for Data 5.x and IBM Cloud. It is not publicly available yet.</span><span data-lang="de">Restage wird von Rueger Consulting entwickelt und täglich in DataStage-Projekten auf Cloud Pak for Data 5.x und IBM Cloud eingesetzt. Öffentlich verfügbar ist es noch nicht.</span></p>
+          <p><span data-lang="en">Interested in using it in your team? Get in touch with Rueger Consulting.</span><span data-lang="de">Interesse am Einsatz im eigenen Team? Sprich Rueger Consulting an.</span></p>
         </div>
         <dl>
           <dt>TARGET</dt><dd>IBM DataStage · Cloud Pak for Data 5.x · IBM Cloud</dd>
           <dt>RUNS</dt><dd><span data-lang="en">Locally (Node.js 22) or as a web app</span><span data-lang="de">Lokal (Node.js 22) oder als Web-Anwendung</span></dd>
-          <dt>UI</dt><dd><span data-lang="en">English and German</span><span data-lang="de">Deutsch und Englisch</span></dd>
-          <dt>BY</dt><dd>TR IT Consulting · Sofia</dd>
+          <dt>UI</dt><dd><span data-lang="en">English and German · light, dark or system theme</span><span data-lang="de">Deutsch und Englisch · hell, dunkel oder wie das System</span></dd>
+          <dt>BY</dt><dd>Rueger Consulting · Sofia</dd>
         </dl>
       </div>
     </div>
@@ -437,7 +499,7 @@ where kd.seg = <span class="st">'A'</span></div>
       <span data-lang="en">IBM, DataStage and Cloud Pak are trademarks of International Business Machines Corporation. Restage is an independent product and is not affiliated with or endorsed by IBM.</span>
       <span data-lang="de">IBM, DataStage und Cloud Pak sind Marken der International Business Machines Corporation. Restage ist ein unabhängiges Produkt und steht in keiner Verbindung zu IBM.</span>
     </p>
-    <p>© 2026 TR IT Consulting</p>
+    <p>© 2026 Rueger Consulting</p>
   </div>
 </footer>
 
