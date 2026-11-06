@@ -121,6 +121,10 @@
   html[lang="en"] .shot img[data-lang="en"], html[lang="de"] .shot img[data-lang="de"] { display: block; }
   .shot figcaption { background: var(--bg-2); border-top: 1px solid var(--line); padding: 12px 18px; color: var(--muted); font-size: 14px; }
   code { font: 0.9em var(--mono); color: var(--text); background: var(--bg-2); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+  .xproj { margin-top: 48px; display: grid; grid-template-columns: 1fr 1.25fr; gap: 32px; align-items: start; }
+  .xlist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .xlist li { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); padding: 16px 18px; color: var(--muted); font-size: 14.5px; }
+  .xlist li b { display: block; color: var(--text); font-size: 15.5px; margin-bottom: 6px; }
   .split-fig { margin-top: 56px; }
   .split-fig .fig-h { font-size: 22px; margin: 0 0 10px; letter-spacing: -.3px; }
   .split-fig .shot { margin-top: 22px; }
@@ -153,7 +157,7 @@
     .panes { grid-template-columns: 1fr; }
     .graph { min-height: 360px; border-right: 0; border-bottom: 1px solid var(--line); }
     .grid, .principles { grid-template-columns: 1fr; }
-    .why, .status, .dropin-grid { grid-template-columns: 1fr; }
+    .why, .status, .dropin-grid, .xproj, .xlist { grid-template-columns: 1fr; }
     .keys { grid-template-columns: repeat(2, 1fr); }
     nav.links a.hide-sm { display: none; }
   }
@@ -390,6 +394,19 @@ where cs.seg = <span class="st">'A'</span></div>
           <span data-lang="de">Echter Screenshot. <kbd>Umschalt+L</kbd> schaltet die Abstammung ein; das Panel zeigt Quelle, unverändertes Durchreichen und die Herleitung <code>UpCase(kd.NAME)</code>.</span>
         </figcaption>
       </figure>
+
+      <div class="xproj">
+        <div>
+          <h3 class="fig-h"><span data-lang="en">And across the whole project</span><span data-lang="de">Und über das ganze Projekt</span></h3>
+          <p class="sub"><span data-lang="en">Lineage doesn’t stop at the edge of a flow. Restage knows which flows write and read every table and file in the project and follows the data from flow to flow – upstream and downstream, as deep as you like.</span><span data-lang="de">Die Abstammung endet nicht am Rand eines Flows. Restage weiß, welche Flows jede Tabelle und Datei des Projekts schreiben und lesen, und verfolgt die Daten von Flow zu Flow – aufwärts und abwärts, so tief wie nötig.</span></p>
+        </div>
+        <ul class="xlist">
+          <li><b><span data-lang="en">Writers &amp; readers</span><span data-lang="de">Schreiber &amp; Leser</span></b><span data-lang="en">For every table and file: which flow and stage writes it (INSERT, UPDATE, MERGE …) and which ones read it – or that it comes from outside the project.</span><span data-lang="de">Zu jeder Tabelle und Datei: welcher Flow und welche Stage sie schreibt (INSERT, UPDATE, MERGE …) und welche sie lesen – oder dass sie von außerhalb des Projekts kommt.</span></li>
+          <li><b><span data-lang="en">Upstream &amp; downstream</span><span data-lang="de">Vorgänger &amp; Nachfolger</span></b><span data-lang="en">Predecessors and successors of a flow at depth 1, 2, 3 or all, with the datasets connecting them – also drawn as a graph.</span><span data-lang="de">Vorgänger und Nachfolger eines Flows in Tiefe 1, 2, 3 oder alle, mit den Datensätzen dazwischen – auch als Graph.</span></li>
+          <li><b><span data-lang="en">Run order</span><span data-lang="de">Reihenfolge</span></b><span data-lang="en">The stages in which the flows must run, derived from the data – plus cycles and tables with several writers.</span><span data-lang="de">Die Stufen, in denen die Flows laufen müssen, aus den Daten abgeleitet – dazu Kreise und Tabellen mit mehreren Schreibern.</span></li>
+          <li><b><span data-lang="en">Mismatches</span><span data-lang="de">Unstimmigkeiten</span></b><span data-lang="en">Columns a reader expects but the writer doesn’t deliver, and the same column with a different type or length on both sides.</span><span data-lang="de">Spalten, die ein Leser erwartet, der Schreiber aber nicht liefert, und dieselbe Spalte mit anderem Typ oder anderer Länge auf beiden Seiten.</span></li>
+        </ul>
+      </div>
     </div>
   </section>
 
