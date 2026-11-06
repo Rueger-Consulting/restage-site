@@ -125,6 +125,13 @@
   .xlist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .xlist li { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); padding: 16px 18px; color: var(--muted); font-size: 14.5px; }
   .xlist li b { display: block; color: var(--text); font-size: 15.5px; margin-bottom: 6px; }
+  .duo { margin-top: 56px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  .shot-card { margin: 0; }
+  .shot-frame { aspect-ratio: 880 / 539; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #1a1e25; box-shadow: 0 24px 60px -30px rgba(0,0,0,.7); }
+  .shot-frame img { display: none; width: 100%; height: auto; }
+  html[lang="en"] .shot-frame img[data-lang="en"], html[lang="de"] .shot-frame img[data-lang="de"] { display: block; }
+  .shot-card figcaption { margin-top: 14px; color: var(--muted); font-size: 15px; }
+  .shot-card figcaption b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
   .split-fig { margin-top: 56px; }
   .split-fig .fig-h { font-size: 22px; margin: 0 0 10px; letter-spacing: -.3px; }
   .split-fig .shot { margin-top: 22px; }
@@ -157,7 +164,7 @@
     .panes { grid-template-columns: 1fr; }
     .graph { min-height: 360px; border-right: 0; border-bottom: 1px solid var(--line); }
     .grid, .principles { grid-template-columns: 1fr; }
-    .why, .status, .dropin-grid, .xproj, .xlist { grid-template-columns: 1fr; }
+    .why, .status, .dropin-grid, .xproj, .xlist, .duo { grid-template-columns: 1fr; }
     .keys { grid-template-columns: repeat(2, 1fr); }
     nav.links a.hide-sm { display: none; }
   }
@@ -485,6 +492,31 @@ where cs.seg = <span class="st">'A'</span></div>
         <div class="key"><kbd>n</kbd><div><span data-lang="en">New stage, or insert into the selected link</span><span data-lang="de">Neue Stage, oder in den gewählten Link einsetzen</span></div></div>
         <div class="key"><kbd>Shift+L</kbd><div><span data-lang="en">Show column lineage</span><span data-lang="de">Abstammung der Spalte zeigen</span></div></div>
         <div class="key"><kbd>Alt+V</kbd><div><span data-lang="en">Compare versions</span><span data-lang="de">Stände vergleichen</span></div></div>
+      </div>
+
+      <div class="duo">
+        <figure class="shot-card">
+          <div class="shot-frame">
+            <img data-lang="en" src="rename-en.webp?v=2" width="880" height="502" loading="lazy" alt="Restage Find &amp; Replace: a regular expression renames all nine links of the flow to lnk_…, with a preview of every change">
+            <img data-lang="de" src="rename-de.webp?v=2" width="880" height="502" loading="lazy" alt="Restage Suchen &amp; Ersetzen: ein regulärer Ausdruck benennt alle neun Links des Flows in lnk_… um, mit Vorschau jeder Änderung">
+          </div>
+          <figcaption>
+            <b><span data-lang="en">Bulk rename</span><span data-lang="de">Massen-Umbenennen</span></b>
+            <span data-lang="en"><kbd>Shift+F</kbd>, a regular expression, the scope “link names” – and all nine links get the prefix <code>lnk_</code>. References like <code>cs.NAME</code> follow; one step, one undo.</span>
+            <span data-lang="de"><kbd>Umschalt+F</kbd>, ein regulärer Ausdruck, Bereich „Link-Namen“ – und alle neun Links bekommen den Präfix <code>lnk_</code>. Verweise wie <code>kd.NAME</code> ziehen mit; ein Schritt, ein Rückgängig.</span>
+          </figcaption>
+        </figure>
+        <figure class="shot-card">
+          <div class="shot-frame">
+            <img data-lang="en" src="keycols-en.webp?v=2" width="880" height="539" loading="lazy" alt="Restage key columns dialog: the keys of every stage – remove duplicates, join, lookup, sort and aggregator">
+            <img data-lang="de" src="keycols-de.webp?v=2" width="880" height="539" loading="lazy" alt="Restage-Dialog Schlüsselspalten: die Schlüssel jeder Stage – Remove Duplicates, Join, Lookup, Sort und Aggregator">
+          </div>
+          <figcaption>
+            <b><span data-lang="en">Every key at a glance</span><span data-lang="de">Alle Schlüssel auf einen Blick</span></b>
+            <span data-lang="en"><kbd>Shift+K</kbd> lists the keys of the flow per stage, in data-flow order – join, lookup, sort, aggregator, remove duplicates; optionally also those in the SQL and the column definitions.</span>
+            <span data-lang="de"><kbd>Umschalt+K</kbd> zeigt die Schlüssel des Flows je Stage, in der Reihenfolge des Datenflusses – Join, Lookup, Sort, Aggregator, Remove Duplicates; auf Wunsch auch die aus dem SQL und den Spaltendefinitionen.</span>
+          </figcaption>
+        </figure>
       </div>
 
       <div class="split-fig">
